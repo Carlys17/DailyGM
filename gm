@@ -1,0 +1,43 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract DailyGM {
+    // Structure to hold user data for GM
+    struct UserGM {
+        bool hasGMedToday;
+        uint lastGMDtime;
+    }
+
+    // Mapping to store user GM status
+    mapping(address => UserGM) public userGM;
+
+    // Event that logs a GM for a user
+    event GMPosted(address indexed user, uint timestamp);
+
+    // Function to post GM message
+    function postGM() public {
+        // Check if the user has already posted today
+        require(
+            block.timestamp > userGM[msg.sender].lastGMDtime + 1 days,
+            "You have already posted GM today!"
+        );
+
+        // Mark that the user has posted GM today
+        userGM[msg.sender].hasGMedToday = true;
+        userGM[msg.sender].lastGMDtime = block.timestamp;
+
+        // Emit event with user's GM
+        emit GMPosted(msg.sender, block.timestamp);
+    }
+
+    // Function to check if the user can post GM
+    function canPostGM() public view returns (bool) {
+        return block.timestamp > userGM[msg.sender].lastGMDtime + 1 days;
+    }
+
+    // Optional: Reset user's GM (for testing or admin use)
+    function resetUserGM(address _user) public {
+        userGM[_user].hasGMedToday = false;
+        userGM[_user].lastGMDtime = 0;
+    }
+}
